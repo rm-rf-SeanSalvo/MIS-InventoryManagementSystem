@@ -10,7 +10,6 @@ namespace InventoryManagementSystem2.Models
         public int Quantity { get; set; }
         public decimal Price { get; set; }
 
-        // Navigation properties
         public virtual Product Product { get; set; }
     }
 
