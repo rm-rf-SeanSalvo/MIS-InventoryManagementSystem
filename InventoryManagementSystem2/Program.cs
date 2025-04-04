@@ -14,8 +14,6 @@ string connectionString = builder.Configuration.GetConnectionString("DefaultConn
 // Add controllers with views
 builder.Services.AddControllersWithViews();
 
-
-// Instantiate the DBConnectionTester and test the connection
 var dbConnectionTester = new DBConnectionTester(connectionString);
 dbConnectionTester.TestConnection();
 
