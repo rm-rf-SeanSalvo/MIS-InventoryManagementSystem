@@ -13,7 +13,7 @@ namespace InventoryManagementSystem2.Models
 
         // Navigation properties
         public virtual Ingredient Ingredient { get; set; }
-        public virtual User User { get; set; }
+        public virtual Users User { get; set; }
     }
 
 }
