@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 
 public class DatabaseController : Controller
 {
-    private readonly AppDbContext _context;
+    private readonly InventoryManagementContext _context;
     private readonly ILogger<DatabaseController> _logger;
 
-    public DatabaseController(AppDbContext context, ILogger<DatabaseController> logger)
+    public DatabaseController(InventoryManagementContext context, ILogger<DatabaseController> logger)
     {
         _context = context;
         _logger = logger;

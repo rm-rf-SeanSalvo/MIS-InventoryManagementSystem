@@ -13,8 +13,6 @@ namespace InventoryManagementSystem2.Models
         public int Quantity { get; set; }
         public decimal UnitPrice { get; set; }
         public decimal SubTotal { get; set; }
-
-        // Navigation properties
         public virtual Orders Order { get; set; }
         public virtual Product Product { get; set; }
         public virtual Bundle Bundle { get; set; }

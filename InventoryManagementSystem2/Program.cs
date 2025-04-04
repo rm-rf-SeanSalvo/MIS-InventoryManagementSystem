@@ -1,15 +1,25 @@
 using Microsoft.EntityFrameworkCore;
 using InventoryManagementSystem2.DATA;
 using Microsoft.Extensions.DependencyInjection;
+using InventoryManagementSystem2.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 // Register the database connection
-builder.Services.AddDbContext<AppDbContext>(options =>
+builder.Services.AddDbContext<InventoryManagementContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
 );
 
+string connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
 // Add controllers with views
 builder.Services.AddControllersWithViews();
+
+
+// Instantiate the DBConnectionTester and test the connection
+var dbConnectionTester = new DBConnectionTester(connectionString);
+dbConnectionTester.TestConnection();
+
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
