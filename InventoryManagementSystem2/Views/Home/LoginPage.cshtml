@@ -8,7 +8,7 @@
             <h3 class="mb-3 text-center">Log In</h3>
             <p class="text-muted text-center">Provide all required information to access your account</p>
 
-            <form asp-action="Login" method="post">
+            <form asp-controller="AdminAuth" asp-action="Login" method="post">
                 @Html.AntiForgeryToken()
 
                 <div class="form-group text-start">
@@ -39,7 +39,6 @@
 
     <div class="right-panel">
         <div class="image-container">
-            <!-- Updated image paths -->
             <img src="~/images/background.png" alt="Background" class="background-image" />
             <img src="~/images/foreground.png" alt="Foreground" class="foreground-image" />
         </div>

@@ -3,17 +3,19 @@ using InventoryManagementSystem2.Models;
 using Microsoft.Data.SqlClient;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http; 
+using Microsoft.AspNetCore.Http;
 
 namespace InventoryManagementSystem2.Controllers
 {
-    public class AuthenticatorController : Controller
+    public class AdminAuthController : Controller
     {
         private readonly IConfiguration _configuration;
 
         // Constructor to inject configuration
-        public AuthenticatorController(IConfiguration configuration)
+        public AdminAuthController(IConfiguration configuration)
         {
             _configuration = configuration;
         }
@@ -36,23 +38,49 @@ namespace InventoryManagementSystem2.Controllers
 
                 if (result.IsValid)
                 {
-                    // If login is successful, you can store the user info in session or cookie.
-                    // Here you can use the Role and UserId for further actions, like redirecting to different areas of the app.
-                    // You could use a session variable for example:
+                    // Store role and ID in session (optional)
                     HttpContext.Session.SetString("Role", result.Role);
                     HttpContext.Session.SetInt32("UserId", result.UserId);
 
-                    // Redirect based on the role or to the requested URL
-                    return RedirectToLocal(returnUrl);
+                    // Create user claims
+                    var claims = new List<Claim>
+                    {
+                        new Claim(ClaimTypes.Name, model.Username),
+                        new Claim(ClaimTypes.Role, result.Role),
+                        new Claim("UserId", result.UserId.ToString())
+                    };
+
+                    var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                    var authProperties = new AuthenticationProperties
+                    {
+                        IsPersistent = model.RememberMe
+                    };
+
+                    // 🔐 Sign in user with cookies
+                    await HttpContext.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(claimsIdentity),
+                        authProperties
+                    );
+
+                    // ✅ Redirect based on role
+                    if (result.Role == "Admin")
+                    {
+                        return RedirectToAction("Index", "Home"); // Redirect Admin to Home view
+                    }
+                    else if (result.Role == "Employee")
+                    {
+                        return RedirectToAction("Privacy", "Home"); // Redirect Employee to Privacy view
+                    }
+                    else
+                    {
+                        return RedirectToAction("Login"); // Redirect to login if role is not found
+                    }
                 }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return View(model);
-                }
+
+                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             }
 
-            // If we get here, something failed, redisplay the form.
             return View(model);
         }
 
