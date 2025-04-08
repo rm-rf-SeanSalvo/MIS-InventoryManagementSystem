@@ -12,7 +12,7 @@ public class HomeController : Controller
     }
 
     // This action is for your login page
-    public IActionResult LoginPage()
+    public IActionResult Login()
     {
         return View();
     }

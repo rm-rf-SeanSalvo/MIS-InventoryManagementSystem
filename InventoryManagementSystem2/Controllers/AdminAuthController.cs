@@ -24,10 +24,10 @@ namespace InventoryManagementSystem2.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            return View();
+            return View("Login");
         }
 
-        // Login action POST (authenticate user using stored procedure)
+        // POST action that handles the login logic
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
@@ -38,43 +38,38 @@ namespace InventoryManagementSystem2.Controllers
 
                 if (result.IsValid)
                 {
-                    // Store role and ID in session (optional)
+                    // Handle user session and authentication logic
                     HttpContext.Session.SetString("Role", result.Role);
                     HttpContext.Session.SetInt32("UserId", result.UserId);
 
-                    // Create user claims
+                    // Create claims for the user
                     var claims = new List<Claim>
-                    {
-                        new Claim(ClaimTypes.Name, model.Username),
-                        new Claim(ClaimTypes.Role, result.Role),
-                        new Claim("UserId", result.UserId.ToString())
-                    };
+            {
+                new Claim(ClaimTypes.Name, model.Username),
+                new Claim(ClaimTypes.Role, result.Role),
+                new Claim("UserId", result.UserId.ToString())
+            };
 
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
-                    var authProperties = new AuthenticationProperties
-                    {
-                        IsPersistent = model.RememberMe
-                    };
 
-                    // 🔐 Sign in user with cookies
+                    // Sign in the user
                     await HttpContext.SignInAsync(
                         CookieAuthenticationDefaults.AuthenticationScheme,
-                        new ClaimsPrincipal(claimsIdentity),
-                        authProperties
+                        new ClaimsPrincipal(claimsIdentity)
                     );
 
-                    // ✅ Redirect based on role
-                    if (result.Role == "Admin")
+                    // Redirect based on the user's role
+                    if (result.Role == "Manager")
                     {
-                        return RedirectToAction("Index", "Home"); // Redirect Admin to Home view
+                        return RedirectToAction("Index", "Home");
                     }
                     else if (result.Role == "Employee")
                     {
-                        return RedirectToAction("Privacy", "Home"); // Redirect Employee to Privacy view
+                        return RedirectToAction("Privacy", "Home");
                     }
                     else
                     {
-                        return RedirectToAction("Login"); // Redirect to login if role is not found
+                        return RedirectToAction("Login");
                     }
                 }
 
@@ -83,6 +78,8 @@ namespace InventoryManagementSystem2.Controllers
 
             return View(model);
         }
+
+
 
         // Helper method to call the stored procedure and authenticate the user
         private async Task<(bool IsValid, string Role, int UserId)> AuthenticateUser(string username, string password)
