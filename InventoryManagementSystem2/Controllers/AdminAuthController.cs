@@ -14,7 +14,6 @@ namespace InventoryManagementSystem2.Controllers
     {
         private readonly IConfiguration _configuration;
 
-        // Constructor to inject configuration
         public AdminAuthController(IConfiguration configuration)
         {
             _configuration = configuration;
@@ -24,10 +23,9 @@ namespace InventoryManagementSystem2.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            return View("Login");
+            return View("~/Views/Home/Login.cshtml");
         }
 
-        // POST action that handles the login logic
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
@@ -38,11 +36,9 @@ namespace InventoryManagementSystem2.Controllers
 
                 if (result.IsValid)
                 {
-                    // Handle user session and authentication logic
                     HttpContext.Session.SetString("Role", result.Role);
                     HttpContext.Session.SetInt32("UserId", result.UserId);
 
-                    // Create claims for the user
                     var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, model.Username),
@@ -52,36 +48,28 @@ namespace InventoryManagementSystem2.Controllers
 
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-                    // Sign in the user
                     await HttpContext.SignInAsync(
                         CookieAuthenticationDefaults.AuthenticationScheme,
                         new ClaimsPrincipal(claimsIdentity)
                     );
 
-                    // Redirect based on the user's role
                     if (result.Role == "Manager")
-                    {
                         return RedirectToAction("Index", "Home");
-                    }
                     else if (result.Role == "Employee")
-                    {
                         return RedirectToAction("Privacy", "Home");
-                    }
                     else
-                    {
                         return RedirectToAction("Login");
-                    }
                 }
 
-                ModelState.AddModelError(string.Empty, "Invalid login attempt.");
+                // ❌ Wrong credentials
+                ModelState.AddModelError(string.Empty, "Invalid username or password.");
             }
 
-            return View(model);
+            // 👇 This ensures it shows the same login page with the error
+            return View("~/Views/Home/Login.cshtml", model);
         }
 
-
-
-        // Helper method to call the stored procedure and authenticate the user
+        // Helper: Call stored procedure to authenticate user
         private async Task<(bool IsValid, string Role, int UserId)> AuthenticateUser(string username, string password)
         {
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
@@ -96,7 +84,6 @@ namespace InventoryManagementSystem2.Controllers
                 using (var command = new SqlCommand("LoginAuthentication", connection))
                 {
                     command.CommandType = System.Data.CommandType.StoredProcedure;
-
                     command.Parameters.AddWithValue("@UserName", username);
                     command.Parameters.AddWithValue("@Password", password);
 
@@ -118,6 +105,7 @@ namespace InventoryManagementSystem2.Controllers
             return (isValid, role, userId);
         }
 
+        // Logout logic
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
