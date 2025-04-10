@@ -19,7 +19,6 @@ namespace InventoryManagementSystem2.Controllers
             _configuration = configuration;
         }
 
-        // Login Page GET action
         [HttpGet]
         public IActionResult Login()
         {
@@ -61,15 +60,12 @@ namespace InventoryManagementSystem2.Controllers
                         return RedirectToAction("Login");
                 }
 
-                // ❌ Wrong credentials
                 ModelState.AddModelError(string.Empty, "Invalid username or password.");
             }
 
-            // 👇 This ensures it shows the same login page with the error
             return View("~/Views/Home/Login.cshtml", model);
         }
 
-        // Helper: Call stored procedure to authenticate user
         private async Task<(bool IsValid, string Role, int UserId)> AuthenticateUser(string username, string password)
         {
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
