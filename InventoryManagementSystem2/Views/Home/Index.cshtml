@@ -1,8 +1,94 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Admin Dashboard";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin-dashboard.css" />
+}
+
+<div class="dashboard-container">
+    <aside class="sidebar">
+        <div class="sidebar-header">Inventory</div>
+        <nav class="sidebar-nav">
+            <a href="@Url.Action("Index", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "Index" ? "active" : "")">Dashboard</a>
+            <a href="@Url.Action("Employees", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "Employees" ? "active" : "")">Employee</a>
+            <a href="@Url.Action("Purchase", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "Purchase" ? "active" : "")">Purchase</a>
+            <a href="@Url.Action("Stock", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "Stock" ? "active" : "")">Stock</a>
+            <a href="@Url.Action("Menu", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "Menu" ? "active" : "")">Menu</a>
+            <a href="@Url.Action("OrderList", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "OrderList" ? "active" : "")">Order List</a>
+        </nav>
+
+        <a href="/Authenticator/Logout" class="logout-btn">Log out</a>
+    </aside>
+
+    <main class="main-content">
+        <div class="top-bar">
+            <span class="greeting">Hello, Salvo!</span>
+        </div>
+
+        <div class="stats-cards">
+            <div class="card users">
+                <div class="value">6</div>
+                <div class="label">Users</div>
+            </div>
+            <div class="card categories">
+                <div class="value">10</div>
+                <div class="label">Categories</div>
+            </div>
+            <div class="card products">
+                <div class="value">23</div>
+                <div class="label">Products</div>
+            </div>
+        </div>
+
+        <div class="tables-row">
+            <div class="table-box">
+                <div class="table-header">Recently Added Products</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Date</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Rice</td>
+                            <td>03-28-25</td>
+                            <td>12kg</td>
+                        </tr>
+                        <tr>
+                            <td>Nori Seaweed</td>
+                            <td>03-28-25</td>
+                            <td>Body table</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-box">
+                <div class="table-header">Update for stock</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Stock</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Crab roll</td>
+                            <td><span class="low-stock">LOW</span></td>
+                        </tr>
+                        <tr>
+                            <td>Avocado</td>
+                            <td><span class="low-stock">LOW</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
 </div>
