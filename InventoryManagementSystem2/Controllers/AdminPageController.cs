@@ -8,24 +8,22 @@ namespace InventoryManagementSystem2.Controllers
         public IActionResult Index()
         {
             // Logic for Dashboard page
-            return View();
+            return View("~/Views/Home/Index.cshtml");
         }
 
         public IActionResult Employees()
         {
             // Logic for Employees page
-            return View();
+            return View("~/Views/Home/Employees.cshtml");
         }
 
         public IActionResult Purchase()
         {
-            // Logic for Purchase page
             return View();
         }
 
         public IActionResult Stock()
         {
-            // Logic for Stock page
             return View();
         }
 

@@ -7,6 +7,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
+using System.Diagnostics.Eventing.Reader;
 
 namespace InventoryManagementSystem2.Controllers
 {
@@ -65,7 +66,7 @@ namespace InventoryManagementSystem2.Controllers
 
             return View("~/Views/Home/Login.cshtml", model);
         }
-
+        
         private async Task<(bool IsValid, string Role, int UserId)> AuthenticateUser(string username, string password)
         {
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
@@ -75,6 +76,7 @@ namespace InventoryManagementSystem2.Controllers
 
             using (var connection = new SqlConnection(connectionString))
             {
+
                 await connection.OpenAsync();
 
                 using (var command = new SqlCommand("LoginAuthentication", connection))
