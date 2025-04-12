@@ -1,5 +1,5 @@
 ﻿@{
-    ViewData["Title"] = "Purchase";
+    ViewData["Title"] = "Menu";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
@@ -13,10 +13,10 @@
         <nav class="sidebar-nav">
             <a href="@Url.Action("Index", "Admin")" class="nav-item">Dashboard</a>
             <a href="@Url.Action("Employees", "Admin")" class="nav-item">Employees</a>
-            <a href="@Url.Action("Purchase", "Admin")" class="nav-item active">Category</a>
+            <a href="@Url.Action("Purchase", "Admin")" class="nav-item">Category</a>
             <a href="@Url.Action("Stock", "Admin")" class="nav-item">Stock</a>
-            <a href="@Url.Action("Index", "Admin")" class="nav-item">Menu</a>
-            <a href="@Url.Action("Index", "Admin")" class="nav-item">Order List</a>
+            <a href="@Url.Action("Menu", "Admin")" class="nav-item active">Menu</a>
+            <a href="@Url.Action("OrderList", "Admin")" class="nav-item">Order List</a>
         </nav>
         <a href="@Url.Action("Logout", "Authenticator")" class="logout-btn">Log out</a>
     </aside>
@@ -27,28 +27,32 @@
         </div>
 
         <div class="table-box">
-            <div class="table-header">Add New Category</div>
-            <form method="post" asp-action="AddPurchase" class="category-form">
-                <input type="text" name="PurchaseName" class="category-input" placeholder="Enter purchase type" required />
-                <button type="submit" class="btn btn-primary">Add Purchase</button>
-            </form>
-        </div>
+            <div class="table-header" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong>Menu List</strong><br />
+                    <small>Last Updated by: <strong>Keyri Calibara</strong></small>
+                </div>
+                <button class="btn btn-primary">Add Menu</button>
+            </div>
 
-        <div class="table-box">
-            <div class="table-header">Category List</div>
-            <table>
+            <table class="styled-table">
                 <thead>
                     <tr>
                         <th>#</th>
-                        <th>Name</th>
+                        <th>Bundle</th>
+                        <th>Type of Sushi</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
-
                     <tr>
                         <td>1</td>
-                        <td>Garnish</td>
+                        <td>BASIC</td>
+                        <td>California Maki</td>
+                        <td>60pcs</td>
+                        <td>₱850</td>
                         <td>
                             <a href="#" class="action-icon edit"><i class="fas fa-edit"></i></a>
                             <a href="#" class="action-icon delete"><i class="fas fa-trash-alt"></i></a>
@@ -56,7 +60,10 @@
                     </tr>
                     <tr>
                         <td>2</td>
-                        <td>Condiment</td>
+                        <td>TRUEPA</td>
+                        <td>California Maki, Kani Rolls, Kappa Rolls, Tamago Rolls</td>
+                        <td>80pcs</td>
+                        <td>₱1,000</td>
                         <td>
                             <a href="#" class="action-icon edit"><i class="fas fa-edit"></i></a>
                             <a href="#" class="action-icon delete"><i class="fas fa-trash-alt"></i></a>

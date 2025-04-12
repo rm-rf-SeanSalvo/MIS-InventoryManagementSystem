@@ -12,8 +12,8 @@
         <div class="sidebar-header">Inventory</div>
         <nav class="sidebar-nav">
             <a href="@Url.Action("Index", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "Index" ? "active" : "")">Dashboard</a>
-            <a href="@Url.Action("Employees", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "Employees" ? "active" : "")">Employee</a>
-            <a href="@Url.Action("Purchase", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "Purchase" ? "active" : "")">Purchase</a>
+            <a href="@Url.Action("Employees", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "Employees" ? "active" : "")">Employees</a>
+            <a href="@Url.Action("Purchase", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "Purchase" ? "active" : "")">Category</a>
             <a href="@Url.Action("Stock", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "Stock" ? "active" : "")">Stock</a>
             <a href="@Url.Action("Menu", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "Menu" ? "active" : "")">Menu</a>
             <a href="@Url.Action("OrderList", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "OrderList" ? "active" : "")">Order List</a>

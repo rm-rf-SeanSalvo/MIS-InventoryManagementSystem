@@ -161,3 +161,22 @@ th, td {
     font-size: 12px;
     font-weight: bold;
 }
+
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+    .styled-table th, .styled-table td {
+        padding: 12px 16px;
+        text-align: left;
+    }
+
+    .styled-table thead th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+
+    .styled-table tbody tr {
+        border-top: 1px solid #ddd;

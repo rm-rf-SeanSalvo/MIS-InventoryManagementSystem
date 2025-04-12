@@ -1,0 +1,93 @@
+﻿@{
+    ViewData["Title"] = "Order Details";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var customerName = "Sean Salvo"; // Replace with model data
+    var totalPrice = "P2450";        // Replace with calculated total
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin-dashboard.css" />
+}
+
+<div class="dashboard-container">
+    <aside class="sidebar">
+        <div class="sidebar-header">Inventory</div>
+        <nav class="sidebar-nav">
+            <a href="@Url.Action("Index", "Admin")" class="nav-item">Dashboard</a>
+            <a href="@Url.Action("Employee", "Admin")" class="nav-item">Employees</a>
+            <a href="@Url.Action("Purchase", "Admin")" class="nav-item">Category</a>
+            <a href="@Url.Action("Stock", "Admin")" class="nav-item">Stock</a>
+            <a href="@Url.Action("Menu", "Admin")" class="nav-item">Menu</a>
+            <a href="@Url.Action("OrderList", "Admin")" class="nav-item active">Order List</a>
+        </nav>
+        <a href="@Url.Action("Logout", "Authenticator")" class="logout-btn">Log out</a>
+    </aside>
+
+    <main class="main-content">
+        <div class="top-bar">
+            <span class="greeting">Hello, Abenganal!</span>
+        </div>
+
+        <div class="table-box">
+            <div class="table-header">
+                Order List
+                <span class="table-subheader">Last Updated by: Kenji Calibara</span>
+                <a href="#" class="btn btn-primary">Add Order</a>
+            </div>
+
+            <div class="search-bar">
+                <label>Search Date</label>
+                <input type="date" class="form-control" />
+            </div>
+
+            <p><strong>Customer Name:</strong> @customerName</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Order Name</th>
+                        <th>Type of Sushi</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Discount</th>
+                        <th>Date Added</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>BAESIC</td>
+                        <td>California Maki</td>
+                        <td>40pcs</td>
+                        <td>P850</td>
+                        <td>0</td>
+                        <td>03-03-25</td>
+                        <td>
+                            <a href="#" class="action-icon edit"><i class="fas fa-edit"></i></a>
+                            <a href="#" class="action-icon delete"><i class="fas fa-trash-alt"></i></a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>TRUEPA</td>
+                        <td>Tamago Rolls</td>
+                        <td>80pcs</td>
+                        <td>P1600</td>
+                        <td>0</td>
+                        <td>03-03-25</td>
+                        <td>
+                            <a href="#" class="action-icon edit"><i class="fas fa-edit"></i></a>
+                            <a href="#" class="action-icon delete"><i class="fas fa-trash-alt"></i></a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="total-price">
+                <strong>Total: @totalPrice</strong>
+            </div>
+        </div>
+    </main>
+</div>

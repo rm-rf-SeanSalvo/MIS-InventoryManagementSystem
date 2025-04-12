@@ -1,0 +1,51 @@
+﻿@{
+    ViewData["Title"] = "Stock";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/admin-dashboard.css" />
+}
+
+<div class="dashboard-container">
+    <aside class="sidebar">
+        <div class="sidebar-header">Inventory</div>
+        <nav class="sidebar-nav">
+            <a href="@Url.Action("Index", "Admin")" class="nav-item">Dashboard</a>
+            <a href="@Url.Action("Employees", "Admin")" class="nav-item">Employees</a>
+            <a href="@Url.Action("Purchase", "Admin")" class="nav-item">Category</a>
+            <a href="@Url.Action("Stock", "Admin")" class="nav-item active">Stock</a>
+            <a href="@Url.Action("Menu", "Admin")" class="nav-item">Menu</a>
+            <a href="@Url.Action("OrderList", "Admin")" class="nav-item">Order List</a>
+        </nav>
+        <a href="@Url.Action("Logout", "Authenticator")" class="logout-btn">Log out</a>
+    </aside>
+
+    <main class="main-content">
+        <div class="top-bar">
+            <span class="greeting">Hello, Salvo!</span>
+        </div>
+
+        <div class="table-header d-flex justify-between align-center" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <strong>Stock</strong><br />
+                <small style="color: #444;">Last Updated by: <strong>Keyri Calibara</strong></small>
+            </div>
+            <button class="btn btn-primary">Add Item</button>
+        </div>
+
+
+            <table class="styled-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Category</th>
+                        <th>In-Stock</th>
+                        <th>Date Added</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1
