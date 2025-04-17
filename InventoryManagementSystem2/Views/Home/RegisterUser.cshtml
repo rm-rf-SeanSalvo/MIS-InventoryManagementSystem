@@ -1,0 +1,62 @@
+﻿@model InventoryManagementSystem2.Models.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Register";
+    Layout = null; // Fullscreen layout
+}
+
+<link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
+
+<div class="register-container">
+    <div class="register-form">
+        <h2>Create an account</h2>
+        <p>Provide all required information to create your account</p>
+
+        <form asp-action="Register" method="post">
+            @Html.AntiForgeryToken()
+
+            <!-- First Name -->
+            <div class="form-group">
+                <label for="FirstName">First Name*</label>
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+
+            <!-- Last Name -->
+            <div class="form-group">
+                <label for="LastName">Last Name*</label>
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+
+            <!-- Password -->
+            <div class="form-group">
+                <label for="Password">Password*</label>
+                <input asp-for="Password" type="password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="form-group">
+                <label for="ConfirmPassword">Confirm Password*</label>
+                <input asp-for="ConfirmPassword" type="password" class="form-control" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <!-- Agree Terms -->
+            <div class="checkbox-group">
+                <input asp-for="AgreeTerms" type="checkbox" />
+                <label for="AgreeTerms">I agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a></label>
+                <span asp-validation-for="AgreeTerms" class="text-danger"></span>
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-submit">Create Account</button>
+        </form>
+
+        <p class="login-link">
+            Already have an account? <a href="@Url.Action("Login", "Home")">Log In</a>
+        </p>
+    </div>
+
+    <!--

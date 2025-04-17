@@ -123,5 +123,57 @@ namespace InventoryManagementSystem2.Controllers
                 return RedirectToAction(nameof(HomeController.Index), "Home");
             }
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Register(RegisterViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View("~/Views/Home/RegisterUser.cshtml", model);
+
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            using (var connection = new SqlConnection(connectionString))
+            {
+                await connection.OpenAsync();
+
+                // Step 1: Check if user already exists
+                using (var checkCmd = new SqlCommand("CheckExistingUser", connection))
+                {
+                    checkCmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    checkCmd.Parameters.AddWithValue("@Username", $"{model.FirstName} {model.LastName}");
+
+                    var reader = await checkCmd.ExecuteReaderAsync();
+                    int userCount = 0;
+
+                    if (reader.Read())
+                        userCount = reader.GetInt32(reader.GetOrdinal("UserCount"));
+
+                    reader.Close();
+
+                    if (userCount > 0)
+                    {
+                        ModelState.AddModelError(string.Empty, "User already exists.");
+                        return View("~/Views/Home/RegisterUser.cshtml", model);
+                    }
+                }
+
+                // Step 2: Insert the new user
+                using (var insertCmd = new SqlCommand("InsertNewUser", connection))
+                {
+                    insertCmd.CommandType = System.Data.CommandType.StoredProcedure;
+                    insertCmd.Parameters.AddWithValue("@FirstName", model.FirstName);
+                    insertCmd.Parameters.AddWithValue("@LastName", model.LastName);
+                    insertCmd.Parameters.AddWithValue("@Password", model.Password); // Consider hashing
+                    insertCmd.Parameters.AddWithValue("@Role", model.Role);
+
+                    await insertCmd.ExecuteNonQueryAsync();
+                }
+            }
+
+            TempData["SuccessMessage"] = "Account created successfully. Please log in.";
+            return RedirectToAction("Login");
+
+        }
     }
 }
