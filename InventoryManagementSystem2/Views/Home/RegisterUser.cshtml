@@ -1,62 +1,77 @@
 ﻿@model InventoryManagementSystem2.Models.RegisterViewModel
 
 @{
-    ViewData["Title"] = "Register";
-    Layout = null; // Fullscreen layout
+    Layout = null;
 }
 
-<link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Register</title>
+    <link rel="stylesheet" href="~/css/register.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="register-container">
+        <!-- Left Panel with Form -->
+        <div class="left-panel">
+            <div class="register-form">
+                <form asp-action="Register" asp-controller="AdminAuth" method="post">
+                    @Html.AntiForgeryToken()
 
-<div class="register-container">
-    <div class="register-form">
-        <h2>Create an account</h2>
-        <p>Provide all required information to create your account</p>
+                    <h3>Register</h3>
+                    @Html.ValidationSummary(true, "", new { @class = "text-danger" })
 
-        <form asp-action="Register" method="post">
-            @Html.AntiForgeryToken()
+                    <div class="form-group">
+                        <label asp-for="FirstName"></label>
+                        <input asp-for="FirstName" class="form-control" />
+                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    </div>
 
-            <!-- First Name -->
-            <div class="form-group">
-                <label for="FirstName">First Name*</label>
-                <input asp-for="FirstName" class="form-control" />
-                <span asp-validation-for="FirstName" class="text-danger"></span>
+                    <div class="form-group">
+                        <label asp-for="LastName"></label>
+                        <input asp-for="LastName" class="form-control" />
+                        <span asp-validation-for="LastName" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Password"></label>
+                        <input asp-for="Password" type="password" class="form-control" />
+                        <span asp-validation-for="Password" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="ConfirmPassword"></label>
+                        <input asp-for="ConfirmPassword" type="password" class="form-control" />
+                        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label asp-for="Role"></label>
+                        <select asp-for="Role" class="form-control">
+                            <option value="">-- Select Role --</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Employee">Employee</option>
+                        </select>
+                        <span asp-validation-for="Role" class="text-danger"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-register">Register</button>
+
+                    <p style="margin-top: 1rem;">Already have an account? <a href="@Url.Action("Login", "AdminAuth")">Log in</a></p>
+                </form>
             </div>
+        </div>
 
-            <!-- Last Name -->
-            <div class="form-group">
-                <label for="LastName">Last Name*</label>
-                <input asp-for="LastName" class="form-control" />
-                <span asp-validation-for="LastName" class="text-danger"></span>
+        <!-- Right Panel with Images -->
+        <div class="right-panel">
+            <div class="image-container">
+                <img src="~/images/background.png" class="background-image" />
+                <img src="~/images/foreground.png" class="foreground-image" />
             </div>
-
-            <!-- Password -->
-            <div class="form-group">
-                <label for="Password">Password*</label>
-                <input asp-for="Password" type="password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
-
-            <!-- Confirm Password -->
-            <div class="form-group">
-                <label for="ConfirmPassword">Confirm Password*</label>
-                <input asp-for="ConfirmPassword" type="password" class="form-control" />
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-            </div>
-
-            <!-- Agree Terms -->
-            <div class="checkbox-group">
-                <input asp-for="AgreeTerms" type="checkbox" />
-                <label for="AgreeTerms">I agree to the <a href="#">Terms</a> and <a href="#">Privacy Policy</a></label>
-                <span asp-validation-for="AgreeTerms" class="text-danger"></span>
-            </div>
-
-            <!-- Submit Button -->
-            <button type="submit" class="btn-submit">Create Account</button>
-        </form>
-
-        <p class="login-link">
-            Already have an account? <a href="@Url.Action("Login", "Home")">Log In</a>
-        </p>
+        </div>
     </div>
 
-    <!--
+    @await Html.PartialAsync("_ValidationScriptsPartial")
+</body>
+</html>

@@ -7,7 +7,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
-using System.Diagnostics.Eventing.Reader;
+using System.Data;
 
 namespace InventoryManagementSystem2.Controllers
 {
@@ -40,11 +40,11 @@ namespace InventoryManagementSystem2.Controllers
                     HttpContext.Session.SetInt32("UserId", result.UserId);
 
                     var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, model.Username),
-                new Claim(ClaimTypes.Role, result.Role),
-                new Claim("UserId", result.UserId.ToString())
-            };
+                    {
+                        new Claim(ClaimTypes.Name, model.Username),
+                        new Claim(ClaimTypes.Role, result.Role),
+                        new Claim("UserId", result.UserId.ToString())
+                    };
 
                     var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
@@ -66,7 +66,7 @@ namespace InventoryManagementSystem2.Controllers
 
             return View("~/Views/Home/Login.cshtml", model);
         }
-        
+
         private async Task<(bool IsValid, string Role, int UserId)> AuthenticateUser(string username, string password)
         {
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
@@ -76,7 +76,6 @@ namespace InventoryManagementSystem2.Controllers
 
             using (var connection = new SqlConnection(connectionString))
             {
-
                 await connection.OpenAsync();
 
                 using (var command = new SqlCommand("LoginAuthentication", connection))
@@ -103,7 +102,6 @@ namespace InventoryManagementSystem2.Controllers
             return (isValid, role, userId);
         }
 
-        // Logout logic
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
@@ -124,6 +122,13 @@ namespace InventoryManagementSystem2.Controllers
             }
         }
 
+        // ✅ Added GET method for RegisterUser
+        [HttpGet]
+        public IActionResult RegisterUser()
+        {
+            return View("~/Views/Home/RegisterUser.cshtml");
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
@@ -137,12 +142,12 @@ namespace InventoryManagementSystem2.Controllers
             {
                 await connection.OpenAsync();
 
-                // Step 1: Check if user already exists
                 using (var checkCmd = new SqlCommand("CheckExistingUser", connection))
                 {
-                    checkCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                    checkCmd.Parameters.AddWithValue("@Username", $"{model.FirstName} {model.LastName}");
+                    checkCmd.CommandType = CommandType.StoredProcedure;
 
+                    checkCmd.Parameters.AddWithValue("@FirstName", model.FirstName);
+                    checkCmd.Parameters.AddWithValue("@LastName", model.LastName);
                     var reader = await checkCmd.ExecuteReaderAsync();
                     int userCount = 0;
 
@@ -158,13 +163,12 @@ namespace InventoryManagementSystem2.Controllers
                     }
                 }
 
-                // Step 2: Insert the new user
-                using (var insertCmd = new SqlCommand("InsertNewUser", connection))
+                using (var insertCmd = new SqlCommand("RegisterUser", connection))
                 {
                     insertCmd.CommandType = System.Data.CommandType.StoredProcedure;
                     insertCmd.Parameters.AddWithValue("@FirstName", model.FirstName);
                     insertCmd.Parameters.AddWithValue("@LastName", model.LastName);
-                    insertCmd.Parameters.AddWithValue("@Password", model.Password); // Consider hashing
+                    insertCmd.Parameters.AddWithValue("@Password", model.Password);
                     insertCmd.Parameters.AddWithValue("@Role", model.Role);
 
                     await insertCmd.ExecuteNonQueryAsync();
@@ -173,7 +177,6 @@ namespace InventoryManagementSystem2.Controllers
 
             TempData["SuccessMessage"] = "Account created successfully. Please log in.";
             return RedirectToAction("Login");
-
         }
     }
 }

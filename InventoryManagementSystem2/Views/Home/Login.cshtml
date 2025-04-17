@@ -1,6 +1,6 @@
 ﻿@model InventoryManagementSystem2.Models.LoginViewModel
 
-<link rel="stylesheet" href="/css/login.css" />
+<link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
 
 <div class="login-container">
     <div class="left-panel">
@@ -36,46 +36,8 @@
 
                 <div class="mt-3 text-center">
                     <span>Don’t have an account?</span>
-                    <a href="#" onclick="toggleForm('register')">Create an account</a>
+                    <a href="@Url.Action("RegisterUser", "AdminAuth")">Create an account</a>
                 </div>
-            </div>
-
-            <div id="registerForm" class="form-section d-none">
-                <h3 class="mb-3 text-center">Create an account</h3>
-                <p class="text-muted text-center">Provide all required information to create your account</p>
-
-                <form asp-controller="AdminAuth" asp-action="Register" method="post">
-                    @Html.AntiForgeryToken()
-
-                    <div class="form-group text-start">
-                        <label>Username</label>
-                        <input name="Username" class="form-control" placeholder="Enter username" required />
-                    </div>
-
-                    <div class="form-group text-start mt-3">
-                        <label>Password</label>
-                        <input name="Password" type="password" class="form-control" placeholder="Enter password" required />
-                    </div>
-
-                    <div class="form-group text-start mt-3">
-                        <label>Confirm Password</label>
-                        <input name="ConfirmPassword" type="password" class="form-control" placeholder="Re-enter password" required />
-                    </div>
-
-                    <div class="form-check mt-3">
-                        <input class="form-check-input" type="checkbox" name="AcceptTerms" id="termsCheck" required />
-                        <label class="form-check-label" for="termsCheck">
-                            I agree to the <a href="#">terms and conditions</a>
-                        </label>
-                    </div>
-
-                    <button type="submit" class="btn btn-login w-100 mt-3">Create Account</button>
-
-                    <div class="mt-3 text-center">
-                        <span>Already have an account?</span>
-                        <a href="#" onclick="toggleForm('login')">Log In</a>
-                    </div>
-                </form>
             </div>
 
         </div>
@@ -91,18 +53,4 @@
 
 @section Scripts {
     @await Html.PartialAsync("_ValidationScriptsPartial")
-    <script>
-        function toggleForm(form) {
-            const login = document.getElementById("loginForm");
-            const register = document.getElementById("registerForm");
-
-            if (form === "register") {
-                login.classList.add("d-none");
-                register.classList.remove("d-none");
-            } else {
-                register.classList.add("d-none");
-                login.classList.remove("d-none");
-            }
-        }
-    </script>
 }
