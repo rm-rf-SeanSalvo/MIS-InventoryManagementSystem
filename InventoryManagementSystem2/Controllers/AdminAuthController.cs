@@ -122,61 +122,83 @@ namespace InventoryManagementSystem2.Controllers
             }
         }
 
-        // ✅ Added GET method for RegisterUser
         [HttpGet]
         public IActionResult RegisterUser()
         {
             return View("~/Views/Home/RegisterUser.cshtml");
         }
-
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
             if (!ModelState.IsValid)
+            {
                 return View("~/Views/Home/RegisterUser.cshtml", model);
+            }
 
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
 
-            using (var connection = new SqlConnection(connectionString))
+            try
             {
-                await connection.OpenAsync();
-
-                using (var checkCmd = new SqlCommand("CheckExistingUser", connection))
+                using (var connection = new SqlConnection(connectionString))
                 {
-                    checkCmd.CommandType = CommandType.StoredProcedure;
+                    await connection.OpenAsync();
 
-                    checkCmd.Parameters.AddWithValue("@FirstName", model.FirstName);
-                    checkCmd.Parameters.AddWithValue("@LastName", model.LastName);
-                    var reader = await checkCmd.ExecuteReaderAsync();
-                    int userCount = 0;
-
-                    if (reader.Read())
-                        userCount = reader.GetInt32(reader.GetOrdinal("UserCount"));
-
-                    reader.Close();
-
-                    if (userCount > 0)
+                    using (var checkCmd = new SqlCommand("CheckExistingUser", connection))
                     {
-                        ModelState.AddModelError(string.Empty, "User already exists.");
-                        return View("~/Views/Home/RegisterUser.cshtml", model);
+                        checkCmd.CommandType = CommandType.StoredProcedure;
+                        checkCmd.Parameters.AddWithValue("@FirstName", model.FirstName);
+                        checkCmd.Parameters.AddWithValue("@LastName", model.LastName);
+
+                        var reader = await checkCmd.ExecuteReaderAsync();
+                        int userCount = 0;
+
+                        if (reader.Read())
+                            userCount = reader.GetInt32(reader.GetOrdinal("UserCount"));
+
+                        reader.Close();
+
+                        if (userCount > 0)
+                        {
+                            ModelState.AddModelError(string.Empty, "User already exists.");
+                            return View("~/Views/Home/RegisterUser.cshtml", model);
+                        }
+                    }
+
+                    // Try inserting the new user
+                    using (var insertCmd = new SqlCommand("RegisterUser", connection))
+                    {
+                        insertCmd.CommandType = CommandType.StoredProcedure;
+                        insertCmd.Parameters.AddWithValue("@FirstName", model.FirstName);
+                        insertCmd.Parameters.AddWithValue("@LastName", model.LastName);
+                        insertCmd.Parameters.AddWithValue("@Password", model.Password);
+                        insertCmd.Parameters.AddWithValue("@Role", model.Role);
+
+                        await insertCmd.ExecuteNonQueryAsync();
                     }
                 }
 
-                using (var insertCmd = new SqlCommand("RegisterUser", connection))
-                {
-                    insertCmd.CommandType = System.Data.CommandType.StoredProcedure;
-                    insertCmd.Parameters.AddWithValue("@FirstName", model.FirstName);
-                    insertCmd.Parameters.AddWithValue("@LastName", model.LastName);
-                    insertCmd.Parameters.AddWithValue("@Password", model.Password);
-                    insertCmd.Parameters.AddWithValue("@Role", model.Role);
-
-                    await insertCmd.ExecuteNonQueryAsync();
-                }
+                TempData["SuccessMessage"] = "Account created successfully. Please log in.";
+                return RedirectToAction("Login");
             }
+            catch (SqlException ex)
+            {
+                if (ex.Message.Contains("Already exists"))
+                {
+                    ModelState.AddModelError(string.Empty, "User already exists.");
+                }
+                else if (ex.Message.Contains("Password must be at least 8 characters"))
+                {
+                    ModelState.AddModelError(string.Empty, "Password must be at least 8 characters.");
+                }
+                else
+                {
+                    ModelState.AddModelError(string.Empty, "An unexpected error occurred. Please try again.");
+                }
 
-            TempData["SuccessMessage"] = "Account created successfully. Please log in.";
-            return RedirectToAction("Login");
+                return View("~/Views/Home/RegisterUser.cshtml", model);
+            }
         }
+
     }
 }

@@ -14,7 +14,7 @@ html, body {
 }
 
 .left-panel {
-    flex: 1;
+    flex: 2;
     display: flex;
     justify-content: flex-start; /* Align form to the left */
     align-items: center; /* Center the form vertically */   
