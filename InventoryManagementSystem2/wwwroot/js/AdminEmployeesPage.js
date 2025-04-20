@@ -1,23 +1,48 @@
 ﻿// Define showPopup globally
-function showPopup(message, isSuccess = false) {
+function showPopup(message, isSuccess = false, onConfirm = null, autoClose = false, duration = 4000) {
     const popup = $('#popup-message');
-    popup.text(message);
+    const popupText = $('#popup-text');
 
+    popupText.text(message);
+
+    // Style
     popup.removeClass('success error d-none');
     popup.addClass(isSuccess ? 'success' : 'error');
-
     popup.addClass('show');
 
-    setTimeout(() => {
-        popup.removeClass('show');
-        setTimeout(() => popup.addClass('d-none'), 400);
-    }, 2500);
+    // Handle mode
+    if (autoClose || onConfirm === null) {
+        $('.confirmation-buttons').hide(); // Hide Yes/No
+        setTimeout(() => {
+            hidePopup();
+        }, duration);
+    } else {
+        $('.confirmation-buttons').show(); // Show Yes/No
+    }
+
+    // Confirm button
+    $('#confirm-action').off('click').on('click', function () {
+        if (onConfirm) onConfirm();
+        hidePopup();
+    });
+
+    // Cancel button
+    $('#cancel-action').off('click').on('click', function () {
+        hidePopup();
+    });
+}
+
+
+// Function to hide the popup
+function hidePopup() {
+    const popup = $('#popup-message');
+    popup.removeClass('show');
+    setTimeout(() => popup.addClass('d-none'), 400); // Delay hiding for smooth transition
 }
 
 $(document).ready(function () {
     $('.edit-btn').on('click', function () {
         var row = $(this).closest('tr');
-
         var first = row.find('.editable-first').text().trim();
         var last = row.find('.editable-last').text().trim();
         var status = row.find('.emp-status').text().trim();
@@ -38,6 +63,32 @@ $(document).ready(function () {
 
         row.find('.edit-btn, .delete-btn').addClass('d-none');
         row.find('.finish-btn, .discard-btn').removeClass('d-none');
+    });
+
+    $(document).on('click', '.delete-btn', function () {
+        var row = $(this).closest('tr');
+        var userId = row.data('userid');
+
+        // Show the custom popup with confirmation
+        showPopup("Are you sure you want to delete this employee?", false, function () {
+            // Proceed with delete action
+            $.ajax({
+                url: '/Admin/DeleteEmployee', // Ensure this route exists and points to the correct action
+                type: 'POST',
+                data: { userId: userId },
+                success: function (response) {
+                    if (response.success) {
+                        row.remove(); // Remove the row from the table
+                        showPopup("Employee deleted successfully.", true);
+                    } else {
+                        showPopup(response.message || "Failed to delete employee.");
+                    }
+                },
+                error: function () {
+                    showPopup("Failed to delete employee.");
+                }
+            });
+        });
     });
 
     $(document).on('click', '.discard-btn', function () {
@@ -69,42 +120,6 @@ $(document).ready(function () {
             error: function () {
                 showPopup("Failed to update employee.");
             }
-        });
-    });
-
-    $(document).on('click', '.delete-btn', function () {
-        var row = $(this).closest('tr');
-        var userId = row.data('userid');
-
-        // Show the custom modal
-        $('#delete-modal').removeClass('d-none');
-
-        // Handle confirm delete
-        $('#confirm-delete').on('click', function () {
-            $.ajax({
-                url: '/Admin/DeleteEmployee',
-                type: 'POST',
-                data: { userId: userId },
-                success: function (response) {
-                    if (response.success) {
-                        row.remove();
-                        showPopup("Employee deleted successfully.", true);
-                    } else {
-                        showPopup(response.message);
-                    }
-                    // Close the modal after action
-                    $('#delete-modal').addClass('d-none');
-                },
-                error: function () {
-                    showPopup("Failed to delete employee.");
-                    $('#delete-modal').addClass('d-none');
-                }
-            });
-        });
-
-        // Handle cancel delete
-        $('#cancel-delete').on('click', function () {
-            $('#delete-modal').addClass('d-none');
         });
     });
 });

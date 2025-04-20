@@ -68,6 +68,16 @@
     </main>
 </div>
 
+<!-- Popup Message -->
+<div id="popup-message" class="popup-message d-none">
+    <p id="popup-text"></p>
+    <div class="confirmation-buttons">
+        <button id="confirm-action" class="btn btn-success">Yes</button>
+        <button id="cancel-action" class="btn btn-danger">No</button>
+    </div>
+</div>
+
+<!-- Delete Modal (just for confirmation) -->
 <div id="delete-modal" class="modal d-none">
     <div class="modal-content">
         <p>Are you sure you want to delete this employee?</p>
@@ -76,8 +86,7 @@
     </div>
 </div>
 
-<div id="popup-message" class="popup-message d-none"></div>
-
 @section Scripts {
-    <script src="~/js/AdminEmployeesPage.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- jQuery -->
+    <script src="~/js/AdminEmployeesPage.js"></script> <!-- Your custom JS -->
 }
