@@ -26,6 +26,13 @@ namespace InventoryManagementSystem2.Controllers
             return View("~/Views/Home/Login.cshtml");
         }
 
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+            return RedirectToAction("Login", "Home"); 
+        }
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
@@ -100,14 +107,6 @@ namespace InventoryManagementSystem2.Controllers
             }
 
             return (isValid, role, userId);
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
-        {
-            await HttpContext.SignOutAsync();
-            return RedirectToAction(nameof(Login));
         }
 
         private IActionResult RedirectToLocal(string returnUrl)
