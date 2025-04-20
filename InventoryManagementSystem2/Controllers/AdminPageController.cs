@@ -120,13 +120,114 @@ namespace InventoryManagementSystem2.Controllers
             }
         }
 
-        public IActionResult Purchase()
+        public async Task<IActionResult> Purchase()
         {
-            return View("~/Views/Home/Purchase.cshtml");
+            var categories = new List<Category>();
+
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+            using (var connection = new SqlConnection(connectionString))
+            {
+                await connection.OpenAsync();
+                using (var command = new SqlCommand("ViewCategories", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            categories.Add(new Category
+                            {
+                                CategoryID = reader.GetInt32(reader.GetOrdinal("CategoryID")),
+                                CategoryName = reader.GetString(reader.GetOrdinal("CategoryName"))
+                            });
+                        }
+                    }
+                }
+            }
+
+            return View("~/Views/Home/Purchase.cshtml", categories);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateCategory(int categoryId, string categoryName)
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                using (var command = new SqlCommand("UpdateCategoryName", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@CategoryID", categoryId);
+                    command.Parameters.AddWithValue("@CategoryName", categoryName);
+
+                    await connection.OpenAsync();
+                    await command.ExecuteNonQueryAsync();
+                }
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "An unexpected error occurred while updating the category." });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeleteCategory(int categoryId)
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                using (var command = new SqlCommand("DeleteCategory", connection))
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@CategoryID", categoryId);
+
+                    await connection.OpenAsync();
+                    await command.ExecuteNonQueryAsync();
+                }
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "An unexpected error occurred while deleting the category." });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddCategory(string categoryName)
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                using (var command = new SqlCommand("AddCategory", connection)) // Matches your procedure name
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@CategoryName", categoryName);
+
+                    await connection.OpenAsync();
+                    await command.ExecuteNonQueryAsync();
+                }
+
+                return RedirectToAction("Purchase");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error adding category: " + ex.Message;
+                return RedirectToAction("Purchase");
+            }
         }
 
         public IActionResult Stock()
-        {
+        { 
             return View("~/Views/Home/Stock.cshtml");
         }
 

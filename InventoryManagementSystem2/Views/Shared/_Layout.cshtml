@@ -5,8 +5,10 @@
         <title>@ViewData["Title"]</title>
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
         <link rel="stylesheet" href="~/css/site.css" />
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-pO2eT+7Sf+SbLZQqZNRN9z8wqfVDUNvZ8Dd7QO1XqFFpsBZCmvB5aZ+0DkCpj7HO3kkqscXoqjxblcdm/CuLiw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-        @RenderSection("Styles", required: false) <!-- ✅ This line is the fix -->
+        @RenderSection("Styles", required: false)
     </head>
     <body>
         @RenderBody()

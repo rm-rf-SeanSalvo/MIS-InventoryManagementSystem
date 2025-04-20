@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace InventoryManagementSystem2.Models
 {
@@ -6,8 +7,16 @@ namespace InventoryManagementSystem2.Models
     {
         [Key]
         public int IngredientID { get; set; }
-        public string Name { get; set; }
-        public string UnitOfMeasure { get; set; }
-    }
 
+        [Required]
+        public string Name { get; set; }
+
+        [Required]
+        public string UnitOfMeasure { get; set; }
+
+        public int CategoryID { get; set; }
+
+        [ForeignKey("CategoryID")]
+        public Category Category { get; set; }
+    }
 }
