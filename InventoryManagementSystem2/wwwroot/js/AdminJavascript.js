@@ -23,6 +23,19 @@ function showPopup(message, isSuccess = false, onConfirm = null, autoClose = fal
     });
 }
 
+// Function to show the Add Item form and hide the table
+function showAddItemForm() {
+    document.getElementById("itemsTable").style.display = "none"; // Hide the table
+    document.getElementById("addItemForm").style.display = "block"; // Show the form
+}
+
+// Function to cancel and go back to the stock table
+function cancelAddItem() {
+    document.getElementById("itemsTable").style.display = "block"; // Show the table
+    document.getElementById("addItemForm").style.display = "none"; // Hide the form
+}
+
+
 function hidePopup() {
     const popup = $('#popup-message');
     popup.removeClass('show');

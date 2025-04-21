@@ -227,9 +227,76 @@ namespace InventoryManagementSystem2.Controllers
         }
 
         public IActionResult Stock()
-        { 
-            return View("~/Views/Home/Stock.cshtml");
+        {
+            string connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                return View("Error");
+            }
+
+            List<StockViewModel> stockList = new List<StockViewModel>();
+
+            using (SqlConnection conn = new SqlConnection(connectionString))
+            {
+                conn.Open();
+
+                using (SqlCommand cmd = new SqlCommand("GetStockView", conn))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+
+                    using (SqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            stockList.Add(new StockViewModel
+                            {
+                                IngredientID = reader.GetInt32(reader.GetOrdinal("IngredientID")),
+                                IngredientName = reader.GetString(reader.GetOrdinal("IngredientName")),
+                                CategoryName = reader.GetString(reader.GetOrdinal("CategoryName")),
+                                UnitOfMeasure = reader.GetString(reader.GetOrdinal("UnitOfMeasure")),
+                                InStock = reader.GetDecimal(reader.GetOrdinal("InStock")),
+                                LastReplenished = reader.GetDateTime(reader.GetOrdinal("LastReplenished"))
+                            });
+                        }
+                    }
+                }
+            }
+
+            return View("~/Views/Home/Stock.cshtml", stockList); 
         }
+
+        public async Task<IActionResult> AddItem(string itemName, int quantity, string category, DateTime dateAdded)
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                using (var connection = new SqlConnection(connectionString))
+                using (var command = new SqlCommand("InsertStockItem", connection)) // Make sure this matches your stored procedure
+                {
+                    command.CommandType = CommandType.StoredProcedure;
+
+                    command.Parameters.AddWithValue("@IngredientName", itemName);
+                    command.Parameters.AddWithValue("@InStock", quantity);
+                    command.Parameters.AddWithValue("@CategoryName", category); // or @CategoryID if you're passing ID
+                    command.Parameters.AddWithValue("@ReplenishmentDate", dateAdded);
+
+                    await connection.OpenAsync();
+                    await command.ExecuteNonQueryAsync();
+                }
+
+                return RedirectToAction("Stock");
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error adding item: " + ex.Message;
+                return RedirectToAction("Stock");
+            }
+        }
+
+
+
 
         public IActionResult Menu()
         {
