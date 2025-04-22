@@ -8,13 +8,13 @@
 @section Styles {
     <link rel="stylesheet" href="~/css/admin-dashboard.css" />
     <style>
-        /* Fix for z-index issues */
+
         .modal {
-            z-index: 1050; /* Ensure modal is above other content */
+            z-index: 1050; 
         }
 
         .modal-backdrop {
-            z-index: 1040; /* Ensure backdrop is below the modal */
+            z-index: 1040; 
         }
     </style>
 }
@@ -38,86 +38,95 @@
             <span class="greeting">Hello, Salvo!</span>
         </div>
 
-        <!-- Table header and Add Item button -->
         <div class="table-header d-flex justify-between align-center" style="display: flex; justify-content: space-between; align-items: center;">
             <div>
                 <strong>Stock</strong><br />
                 <small style="color: #444;">Last Updated by: <strong>Keyri Calibara</strong></small>
             </div>
-            <button class="btn btn-primary" onclick="showAddItemForm()">Add Item</button>
+            <button class="btn btn-primary" data-toggle="modal" data-target="#addItemModal">Add Item</button>
         </div>
 
-        <!-- Table displaying the stock -->
-        <div id="itemsTable" style="display: block;">
-            <table class="styled-table">
-                <thead>
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>In-Stock</th>
+                    <th>Date Added</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var stock in Model)
+                {
                     <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Category</th>
-                        <th>In-Stock</th>
-                        <th>Date Added</th>
-                        <th>Action</th>
+                        <td>@stock.IngredientID</td>
+                        <td>@stock.IngredientName</td>
+                        <td>@stock.CategoryName</td>
+                        <td>@stock.InStock</td>
+                        <td>@(stock.LastReplenished != null ? stock.LastReplenished.ToString("yyyy-MM-dd") : "N/A")</td>
+                        <td>
+                            <a href="@Url.Action("EditStock", "Admin", new { id = stock.IngredientID })" class="btn btn-primary btn-sm">Edit</a>
+                            <a href="@Url.Action("DeleteStock", "Admin", new { id = stock.IngredientID })" class="btn btn-danger btn-sm">Delete</a>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    @foreach (var stock in Model)
-                    {
-                        <tr>
-                            <td>@stock.IngredientID</td>
-                            <td>@stock.IngredientName</td>
-                            <td>@stock.CategoryName</td>
-                            <td>@stock.InStock</td>
-                            <td>@(stock.LastReplenished != null ? stock.LastReplenished.ToString("yyyy-MM-dd") : "N/A")</td>
-                            <td>
-                                <a href="@Url.Action("EditStock", "Admin", new { id = stock.IngredientID })" class="btn btn-primary btn-sm">Edit</a>
-                                <a href="@Url.Action("DeleteStock", "Admin", new { id = stock.IngredientID })" class="btn btn-danger btn-sm">Delete</a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
+                }
+            </tbody>
+        </table>
+    </main>
+</div>
 
-        <!-- Add Item Form (Initially hidden) -->
-        <div id="addItemForm" style="display: none;">
-            <h3>Add New Item</h3>
-            <form action="@Url.Action("AddItem", "Admin")" method="post">
-                <div class="form-group">
-                    <label for="itemName">Item Name</label>
-                    <input type="text" class="form-control" id="itemName" name="itemName" required />
+<!-- Modal for Adding Stock -->
+<div class="modal fade" id="addItemModal" tabindex="-1" role="dialog" aria-labelledby="addItemModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <form action="@Url.Action("AddStock", "Admin")" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addItemModalLabel">Add New Item</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="ingredientName">Ingredient Name</label>
+                        <input type="text" class="form-control" id="ingredientName" name="ingredientName" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select class="form-control" id="category" name="category" required>
+                            <option value="">Select Category</option>
+                            @foreach (var category in Model.Select(x => x.CategoryName).Distinct())
+                            {
+                                <option value="@category">@category</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="inStock">In-Stock Quantity</label>
+                        <input type="number" class="form-control" id="inStock" name="inStock" min="0" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="replenishmentDate">Replenishment Date</label>
+                        <input type="date" class="form-control" id="replenishmentDate" name="replenishmentDate" required />
+                    </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="quantity">Quantity</label>
-                    <input type="number" class="form-control" id="quantity" name="quantity" min="1" required />
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Item</button>
                 </div>
-
-                <div class="form-group">
-                    <label for="category">Category</label>
-                    <select class="form-control" id="category" name="category" required>
-                        <option value="">Select Category</option>
-                        @foreach (var category in Model.Select(x => x.CategoryName).Distinct())
-                        {
-                            <option value="@category">@category</option>
-                        }
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="dateAdded">Date Added</label>
-                    <input type="text" class="form-control" id="dateAdded" name="dateAdded" value="@DateTime.Now.ToString("yyyy-MM-dd")" readonly />
-                </div>
-
-                <button type="submit" class="btn btn-primary">Add Item</button>
-                <button type="button" class="btn btn-secondary" onclick="cancelAddItem()">Cancel</button>
             </form>
         </div>
-    </main>
+    </div>
 </div>
 
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/AdminJavascript.js"></script>
+    <script src="~/js/AdminJavascript.js"> <</script>
 }

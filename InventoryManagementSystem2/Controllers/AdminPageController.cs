@@ -60,35 +60,31 @@ namespace InventoryManagementSystem2.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> UpdateEmployee(int userId, string firstName, string lastName, int status, string role)
+        public async Task<IActionResult> UpdateEmployee(int userId, string firstName, string lastName, bool status, string role)
         {
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
 
             try
             {
                 using (var connection = new SqlConnection(connectionString))
+                using (var command = new SqlCommand("UpdateEmployee", connection))
                 {
+                    command.CommandType = CommandType.StoredProcedure;
+                    command.Parameters.AddWithValue("@UserId", userId);
+                    command.Parameters.AddWithValue("@FirstName", firstName);
+                    command.Parameters.AddWithValue("@LastName", lastName);
+                    command.Parameters.AddWithValue("@IsActive", status);
+                    command.Parameters.AddWithValue("@Role", role);
+
                     await connection.OpenAsync();
-
-                    using (var command = new SqlCommand("UpdateEmployee", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-
-                        command.Parameters.AddWithValue("@UserId", userId);
-                        command.Parameters.AddWithValue("@FirstName", firstName);
-                        command.Parameters.AddWithValue("@LastName", lastName);
-                        command.Parameters.AddWithValue("@IsActive", status);
-                        command.Parameters.AddWithValue("@Role", role);
-
-                        await command.ExecuteNonQueryAsync();
-                    }
+                    await command.ExecuteNonQueryAsync();
                 }
 
                 return Json(new { success = true });
             }
             catch (Exception ex)
             {
-                return Json(new { success = false, message = ex.Message });
+                return Json(new { success = false, message = "Failed to update employee: " + ex.Message });
             }
         }
 
@@ -119,6 +115,7 @@ namespace InventoryManagementSystem2.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
 
         public async Task<IActionResult> Purchase()
         {
