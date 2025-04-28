@@ -21,7 +21,7 @@ function showPopup(message, isSuccess = false, onConfirm = null, autoClose = fal
     $('#cancel-action').off('click').on('click', function () {
         hidePopup();
     });
-
+    //
     // Function to show the Add Item form and hide the table
     function showAddItemForm() {
         document.getElementById("itemsTable").style.display = "none"; // Hide the table
