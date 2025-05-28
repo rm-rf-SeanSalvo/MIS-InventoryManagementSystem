@@ -131,10 +131,20 @@
         min-width: 300px;
     }
 
-    .table-header {
-        font-weight: bold;
-        font-size: 18px;
-        margin-bottom: 10px;
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+    flex-wrap: wrap; /* Optional, helps on smaller screens */
+    z-index: 1; /* Make sure it's above background elements */
+}
+    .table-header > div {
+        display: flex;
+        flex-direction: column;
+    }
+    .table-header button {
+        margin-left: 10px;
     }
 
     table {

@@ -35,7 +35,8 @@
         <div class="table-box">
             <div class="table-header">Add New Category</div>
             <form method="post" asp-action="AddCategory" asp-controller="Admin" class="category-form">
-                <input type="text" name="CategoryName" class="category-input" placeholder="Enter Category Name" required />
+                @Html.AntiForgeryToken()
+                <input type="text" name="categoryName" class="category-input" placeholder="Enter Category Name" required />
                 <button type="submit" class="btn btn-primary">Add Category</button>
             </form>
         </div>
@@ -61,10 +62,10 @@
                                 <td>@count</td>
                                 <td class="category-name">@category.CategoryName</td>
                                 <td class="category-actions">
-                                    <button class="edit-category-btn btn btn-primary btn-sm">Edit</button>
-                                    <button class="delete-category-btn btn btn-danger btn-sm">Delete</button>
-                                    <button class="finish-category-btn btn btn-success btn-sm d-none">Finish</button>
-                                    <button class="discard-category-btn btn btn-secondary btn-sm d-none">Discard</button>
+                                    <button type="button" class="edit-category-btn btn btn-primary btn-sm">Edit</button>
+                                    <button type="button" class="delete-category-btn btn btn-danger btn-sm">Delete</button>
+                                    <button type="button" class="finish-category-btn btn btn-success btn-sm d-none">Finish</button>
+                                    <button type="button" class="discard-category-btn btn btn-secondary btn-sm d-none">Discard</button>
                                 </td>
                             </tr>
                             count++;
@@ -82,7 +83,7 @@
     </main>
 </div>
 
-<!-- Popup for confirmation action -->
+<!-- Popup for confirmation (currently not in use) -->
 <div id="popup-message" class="popup-message d-none">
     <p id="popup-text"></p>
     <div class="confirmation-buttons">
@@ -92,6 +93,118 @@
 </div>
 
 @section Scripts {
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="~/js/AdminJavascript.js"></script> <!-- Ensure your JavaScript file exists at this location -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            // Edit
+            document.querySelectorAll(".edit-category-btn").forEach(btn => {
+                btn.addEventListener("click", function () {
+                    const row = this.closest("tr");
+                    const nameCell = row.querySelector(".category-name");
+                    const originalText = nameCell.textContent.trim();
+
+                    nameCell.innerHTML = `<input type="text" class="edit-input form-control" value="${originalText}" />`;
+                    row.setAttribute("data-original-name", originalText);
+
+                    row.querySelector(".edit-category-btn").style.display = "none";
+                    row.querySelector(".delete-category-btn").style.display = "none";
+                    row.querySelector(".finish-category-btn").classList.remove("d-none");
+                    row.querySelector(".discard-category-btn").classList.remove("d-none");
+                });
+            });
+
+            // Finish (Update)
+            document.querySelectorAll(".finish-category-btn").forEach(btn => {
+                btn.addEventListener("click", async function () {
+                    const row = this.closest("tr");
+                    const categoryId = row.getAttribute("data-categoryid");
+                    const newName = row.querySelector("input.edit-input").value.trim();
+
+                    if (!newName) {
+                        alert("Category name cannot be empty.");
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch('/Admin/UpdateCategory', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': token
+                            },
+                            body: JSON.stringify({ categoryID: parseInt(categoryId), categoryName: newName })
+                        });
+
+                        const result = await response.json();
+
+                        if (result.success) {
+                            row.querySelector(".category-name").textContent = newName;
+                            row.removeAttribute("data-original-name");
+                        } else {
+                            alert(result.message || "Update failed.");
+                            row.querySelector(".category-name").textContent = row.getAttribute("data-original-name");
+                        }
+                    } catch (err) {
+                        alert("Error updating category.");
+                    }
+
+                    row.querySelector(".edit-category-btn").style.display = "inline-block";
+                    row.querySelector(".delete-category-btn").style.display = "inline-block";
+                    row.querySelector(".finish-category-btn").classList.add("d-none");
+                    row.querySelector(".discard-category-btn").classList.add("d-none");
+                });
+            });
+
+            // Discard (Cancel Edit)
+            document.querySelectorAll(".discard-category-btn").forEach(btn => {
+                btn.addEventListener("click", function () {
+                    const row = this.closest("tr");
+                    const originalName = row.getAttribute("data-original-name");
+
+                    if (originalName) {
+                        row.querySelector(".category-name").textContent = originalName;
+                        row.removeAttribute("data-original-name");
+                    }
+
+                    row.querySelector(".edit-category-btn").style.display = "inline-block";
+                    row.querySelector(".delete-category-btn").style.display = "inline-block";
+                    row.querySelector(".finish-category-btn").classList.add("d-none");
+                    row.querySelector(".discard-category-btn").classList.add("d-none");
+                });
+            });
+
+            // Delete
+            document.querySelectorAll(".delete-category-btn").forEach(btn => {
+                btn.addEventListener("click", function () {
+                    const row = this.closest("tr");
+                    const categoryId = row.getAttribute("data-categoryid");
+                    const categoryName = row.querySelector(".category-name").textContent;
+
+                    if (confirm(`Are you sure you want to delete the category "${categoryName}"? This action cannot be undone.`)) {
+                        fetch('/Admin/DeleteCategory', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'RequestVerificationToken': token
+                            },
+                            body: JSON.stringify({ categoryId: parseInt(categoryId) })
+                        })
+                            .then(res => res.json())
+                            .then(data => {
+                                if (data.success) {
+                                    row.remove();
+                                    document.querySelectorAll('tbody tr').forEach((tr, idx) => {
+                                        tr.querySelector('td:first-child').textContent = idx + 1;
+                                    });
+                                } else {
+                                    alert(data.message || "Failed to delete category.");
+                                }
+                            })
+                            .catch(() => alert("Error deleting category."));
+                    }
+                });
+            });
+        });
+    </script>
 }

@@ -5,10 +5,8 @@ using System.Data;
 
 namespace InventoryManagementSystem2.Controllers
 {
-
     public class AdminController : Controller
     {
-
         private readonly IConfiguration _configuration;
 
         public AdminController(IConfiguration configuration)
@@ -16,10 +14,8 @@ namespace InventoryManagementSystem2.Controllers
             _configuration = configuration;
         }
 
-
         public IActionResult Index()
         {
-
             return View("~/Views/Home/Index.cshtml");
         }
 
@@ -28,32 +24,35 @@ namespace InventoryManagementSystem2.Controllers
             var employees = new List<EmployeeViewModel>();
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
 
-            using (var connection = new SqlConnection(connectionString))
+            try
             {
+                await using var connection = new SqlConnection(connectionString);
                 await connection.OpenAsync();
 
-                using (var command = new SqlCommand("ViewEmployees", connection))
+                using var command = new SqlCommand("ViewEmployees", connection)
                 {
-                    command.CommandType = CommandType.StoredProcedure;
+                    CommandType = CommandType.StoredProcedure
+                };
 
-                    using (var reader = await command.ExecuteReaderAsync())
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    employees.Add(new EmployeeViewModel
                     {
-                        while (await reader.ReadAsync())
-                        {
-                            employees.Add(new EmployeeViewModel
-                            {
-                                UserId = reader.GetInt32(reader.GetOrdinal("UserID")),
-                                FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
-                                LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                                Role = reader.GetString(reader.GetOrdinal("Role")),
-                                Status = reader.GetBoolean(reader.GetOrdinal("IsActive")) ? "Active" : "Inactive",
-                                LastLogin = reader.IsDBNull(reader.GetOrdinal("LastLogin"))
-                                            ? DateTime.MinValue
-                                            : reader.GetDateTime(reader.GetOrdinal("LastLogin"))
-                            });
-                        }
-                    }
+                        UserId = reader.GetInt32(reader.GetOrdinal("UserID")),
+                        FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
+                        LastName = reader.GetString(reader.GetOrdinal("LastName")),
+                        Role = reader.GetString(reader.GetOrdinal("Role")),
+                        Status = reader.GetBoolean(reader.GetOrdinal("IsActive")) ? "Active" : "Inactive",
+                        LastLogin = reader.IsDBNull(reader.GetOrdinal("LastLogin"))
+                                    ? DateTime.MinValue
+                                    : reader.GetDateTime(reader.GetOrdinal("LastLogin"))
+                    });
                 }
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error loading employees: " + ex.Message;
             }
 
             return View("~/Views/Home/Employees.cshtml", employees);
@@ -66,19 +65,20 @@ namespace InventoryManagementSystem2.Controllers
 
             try
             {
-                using (var connection = new SqlConnection(connectionString))
-                using (var command = new SqlCommand("UpdateEmployee", connection))
+                await using var connection = new SqlConnection(connectionString);
+                await using var command = new SqlCommand("UpdateEmployee", connection)
                 {
-                    command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.AddWithValue("@UserId", userId);
-                    command.Parameters.AddWithValue("@FirstName", firstName);
-                    command.Parameters.AddWithValue("@LastName", lastName);
-                    command.Parameters.AddWithValue("@IsActive", status);
-                    command.Parameters.AddWithValue("@Role", role);
+                    CommandType = CommandType.StoredProcedure
+                };
 
-                    await connection.OpenAsync();
-                    await command.ExecuteNonQueryAsync();
-                }
+                command.Parameters.AddWithValue("@UserId", userId);
+                command.Parameters.AddWithValue("@FirstName", firstName);
+                command.Parameters.AddWithValue("@LastName", lastName);
+                command.Parameters.AddWithValue("@IsActive", status);
+                command.Parameters.AddWithValue("@Role", role);
+
+                await connection.OpenAsync();
+                await command.ExecuteNonQueryAsync();
 
                 return Json(new { success = true });
             }
@@ -95,18 +95,16 @@ namespace InventoryManagementSystem2.Controllers
 
             try
             {
-                using (var connection = new SqlConnection(connectionString))
+                await using var connection = new SqlConnection(connectionString);
+                await using var command = new SqlCommand("EraseUserData", connection)
                 {
-                    await connection.OpenAsync();
+                    CommandType = CommandType.StoredProcedure
+                };
 
-                    using (var command = new SqlCommand("EraseUserData", connection))
-                    {
-                        command.CommandType = CommandType.StoredProcedure;
-                        command.Parameters.AddWithValue("@UserID", userId);
+                command.Parameters.AddWithValue("@UserID", userId);
 
-                        await command.ExecuteNonQueryAsync();
-                    }
-                }
+                await connection.OpenAsync();
+                await command.ExecuteNonQueryAsync();
 
                 return Json(new { success = true });
             }
@@ -116,85 +114,37 @@ namespace InventoryManagementSystem2.Controllers
             }
         }
 
-
         public async Task<IActionResult> Purchase()
         {
             var categories = new List<Category>();
-
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
-            using (var connection = new SqlConnection(connectionString))
-            {
-                await connection.OpenAsync();
-                using (var command = new SqlCommand("ViewCategories", connection))
-                {
-                    command.CommandType = CommandType.StoredProcedure;
 
-                    using (var reader = await command.ExecuteReaderAsync())
+            try
+            {
+                await using var connection = new SqlConnection(connectionString);
+                await connection.OpenAsync();
+
+                using var command = new SqlCommand("ViewCategories", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+
+                using var reader = await command.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    categories.Add(new Category
                     {
-                        while (await reader.ReadAsync())
-                        {
-                            categories.Add(new Category
-                            {
-                                CategoryID = reader.GetInt32(reader.GetOrdinal("CategoryID")),
-                                CategoryName = reader.GetString(reader.GetOrdinal("CategoryName"))
-                            });
-                        }
-                    }
+                        CategoryID = reader.GetInt32(reader.GetOrdinal("CategoryID")),
+                        CategoryName = reader.GetString(reader.GetOrdinal("CategoryName"))
+                    });
                 }
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error loading categories: " + ex.Message;
             }
 
             return View("~/Views/Home/Purchase.cshtml", categories);
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> UpdateCategory(int categoryId, string categoryName)
-        {
-            var connectionString = _configuration.GetConnectionString("DefaultConnection");
-
-            try
-            {
-                using (var connection = new SqlConnection(connectionString))
-                using (var command = new SqlCommand("UpdateCategoryName", connection))
-                {
-                    command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.AddWithValue("@CategoryID", categoryId);
-                    command.Parameters.AddWithValue("@CategoryName", categoryName);
-
-                    await connection.OpenAsync();
-                    await command.ExecuteNonQueryAsync();
-                }
-
-                return Json(new { success = true });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = "An unexpected error occurred while updating the category." });
-            }
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> DeleteCategory(int categoryId)
-        {
-            var connectionString = _configuration.GetConnectionString("DefaultConnection");
-
-            try
-            {
-                using (var connection = new SqlConnection(connectionString))
-                using (var command = new SqlCommand("DeleteCategory", connection))
-                {
-                    command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.AddWithValue("@CategoryID", categoryId);
-
-                    await connection.OpenAsync();
-                    await command.ExecuteNonQueryAsync();
-                }
-
-                return Json(new { success = true });
-            }
-            catch (Exception ex)
-            {
-                return Json(new { success = false, message = "An unexpected error occurred while deleting the category." });
-            }
         }
 
         [HttpPost]
@@ -204,15 +154,16 @@ namespace InventoryManagementSystem2.Controllers
 
             try
             {
-                using (var connection = new SqlConnection(connectionString))
-                using (var command = new SqlCommand("AddCategory", connection)) // Matches your procedure name
+                await using var connection = new SqlConnection(connectionString);
+                await using var command = new SqlCommand("AddCategory", connection)
                 {
-                    command.CommandType = CommandType.StoredProcedure;
-                    command.Parameters.AddWithValue("@CategoryName", categoryName);
+                    CommandType = CommandType.StoredProcedure
+                };
 
-                    await connection.OpenAsync();
-                    await command.ExecuteNonQueryAsync();
-                }
+                command.Parameters.AddWithValue("@CategoryName", categoryName);
+
+                await connection.OpenAsync();
+                await command.ExecuteNonQueryAsync();
 
                 return RedirectToAction("Purchase");
             }
@@ -223,44 +174,111 @@ namespace InventoryManagementSystem2.Controllers
             }
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateCategory([FromBody] Category category)
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            if (string.IsNullOrWhiteSpace(category.CategoryName))
+            {
+                return Json(new { success = false, message = "Category name must not be empty." });
+            }
+
+            try
+            {
+                await using var connection = new SqlConnection(connectionString);
+                await connection.OpenAsync();
+
+                using var command = new SqlCommand("UpdateCategoryName", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+
+                command.Parameters.AddWithValue("@CategoryID", category.CategoryID);
+                command.Parameters.AddWithValue("@CategoryName", category.CategoryName);
+
+                await command.ExecuteNonQueryAsync();
+
+                return Json(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCategory([FromBody] DeleteCategoryRequest request)
+        {
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+            try
+            {
+                await using var connection = new SqlConnection(connectionString);
+                await using var command = new SqlCommand("DeleteCategory", connection)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+
+                command.Parameters.AddWithValue("@CategoryID", request.CategoryId);
+
+                await connection.OpenAsync();
+                int rowsAffected = await command.ExecuteNonQueryAsync();
+
+                if (rowsAffected > 0)
+                    return Json(new { success = true });
+                else
+                    return Json(new { success = false, message = "Category not found or already deleted." });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Error deleting category: " + ex.Message });
+            }
+        }
+
+        public class DeleteCategoryRequest
+        {
+            public int CategoryId { get; set; }
+        }
+
         public IActionResult Stock()
         {
-            string connectionString = _configuration.GetConnectionString("DefaultConnection");
+            var connectionString = _configuration.GetConnectionString("DefaultConnection");
+            var stockList = new List<StockViewModel>();
 
-            if (string.IsNullOrEmpty(connectionString))
+            try
             {
-                return View("Error");
-            }
-
-            List<StockViewModel> stockList = new List<StockViewModel>();
-
-            using (SqlConnection conn = new SqlConnection(connectionString))
-            {
+                using var conn = new SqlConnection(connectionString);
                 conn.Open();
 
-                using (SqlCommand cmd = new SqlCommand("GetStockView", conn))
+                using var cmd = new SqlCommand("GetStockView", conn)
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
+                    CommandType = CommandType.StoredProcedure
+                };
 
-                    using (SqlDataReader reader = cmd.ExecuteReader())
+                using var reader = cmd.ExecuteReader();
+                while (reader.Read())
+                {
+                    stockList.Add(new StockViewModel
                     {
-                        while (reader.Read())
-                        {
-                            stockList.Add(new StockViewModel
-                            {
-                                IngredientID = reader.GetInt32(reader.GetOrdinal("IngredientID")),
-                                IngredientName = reader.GetString(reader.GetOrdinal("IngredientName")),
-                                CategoryName = reader.GetString(reader.GetOrdinal("CategoryName")),
-                                UnitOfMeasure = reader.GetString(reader.GetOrdinal("UnitOfMeasure")),
-                                InStock = reader.GetDecimal(reader.GetOrdinal("InStock")),
-                                LastReplenished = reader.GetDateTime(reader.GetOrdinal("LastReplenished"))
-                            });
-                        }
-                    }
+                        IngredientID = reader.GetInt32(reader.GetOrdinal("IngredientID")),
+                        IngredientName = reader.GetString(reader.GetOrdinal("IngredientName")),
+                        CategoryName = reader.GetString(reader.GetOrdinal("CategoryName")),
+                        UnitOfMeasure = reader.GetString(reader.GetOrdinal("UnitOfMeasure")),
+                        InStock = reader.GetDecimal(reader.GetOrdinal("InStock")),
+                        LastReplenished = reader.GetDateTime(reader.GetOrdinal("LastReplenished"))
+                    });
                 }
             }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "Error loading stock: " + ex.Message;
+            }
 
-            return View("~/Views/Home/Stock.cshtml", stockList); 
+            return View("~/Views/Home/Stock.cshtml", stockList);
         }
 
         public async Task<IActionResult> AddItem(string itemName, int quantity, string category, DateTime dateAdded)
@@ -269,19 +287,19 @@ namespace InventoryManagementSystem2.Controllers
 
             try
             {
-                using (var connection = new SqlConnection(connectionString))
-                using (var command = new SqlCommand("InsertStockItem", connection)) // Make sure this matches your stored procedure
+                await using var connection = new SqlConnection(connectionString);
+                await using var command = new SqlCommand("InsertStockItem", connection)
                 {
-                    command.CommandType = CommandType.StoredProcedure;
+                    CommandType = CommandType.StoredProcedure
+                };
 
-                    command.Parameters.AddWithValue("@IngredientName", itemName);
-                    command.Parameters.AddWithValue("@InStock", quantity);
-                    command.Parameters.AddWithValue("@CategoryName", category); // or @CategoryID if you're passing ID
-                    command.Parameters.AddWithValue("@ReplenishmentDate", dateAdded);
+                command.Parameters.AddWithValue("@IngredientName", itemName);
+                command.Parameters.AddWithValue("@InStock", quantity);
+                command.Parameters.AddWithValue("@CategoryName", category);
+                command.Parameters.AddWithValue("@ReplenishmentDate", dateAdded);
 
-                    await connection.OpenAsync();
-                    await command.ExecuteNonQueryAsync();
-                }
+                await connection.OpenAsync();
+                await command.ExecuteNonQueryAsync();
 
                 return RedirectToAction("Stock");
             }
@@ -292,20 +310,14 @@ namespace InventoryManagementSystem2.Controllers
             }
         }
 
-
-
-
         public IActionResult Menu()
         {
-
             return View("~/Views/Home/Menu.cshtml");
         }
 
         public IActionResult OrderList()
         {
-
             return View("~/Views/Home/OrderList.cshtml");
         }
     }
-
 }
