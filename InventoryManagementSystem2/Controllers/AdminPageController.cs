@@ -20,60 +20,7 @@ namespace InventoryManagementSystem2.Controllers
             _configuration = configuration;
             _context = context;
         }
-        public async Task<IActionResult> Index()
-        {
-            //var model = new DashboardViewModel();
-
-            //// Init collections (if not already done in class)
-            //model.LowStockItems = new List<LowStock>();
-            //model.RecentProducts = new List<RecentProduct>();
-
-            //using (var conn = _context.Database.GetDbConnection())
-            //{
-            //    await conn.OpenAsync();
-
-            //    using (var cmd = conn.CreateCommand())
-            //    {
-            //        cmd.CommandText = "GetTotalUsers";
-            //        cmd.CommandType = CommandType.StoredProcedure;
-            //        model.TotalUsers = Convert.ToInt32(await cmd.ExecuteScalarAsync());
-
-            //        cmd.CommandText = "GetTotalCategories";
-            //        model.TotalCategories = Convert.ToInt32(await cmd.ExecuteScalarAsync());
-
-            //        cmd.CommandText = "GetTotalProducts";
-            //        model.TotalProducts = Convert.ToInt32(await cmd.ExecuteScalarAsync());
-            //    }
-
-            //    using (var cmd = conn.CreateCommand())
-            //    {
-            //        cmd.CommandText = "GetLowStockItems";
-            //        cmd.CommandType = CommandType.StoredProcedure;
-
-            //        using (var reader = await cmd.ExecuteReaderAsync())
-            //        {
-            //            while (await reader.ReadAsync())
-            //            {
-            //                model.LowStockItems.Add(new LowStock
-            //                {
-            //                    ProductName = reader["ProductName"].ToString(),
-            //                    Quantity = 0 // or read real value if needed
-            //                });
-            //            }
-            //        }
-            //    }
-            //}
-
-
-            Console.WriteLine("HIT ADMIN INDEX");
-            var model = new DashboardViewModel();
-            model.LowStockItems = new List<LowStock>();
-            model.RecentProducts = new List<RecentProduct>();
-
-            return View("~/Views/Home/Index.cshtml", model);
-        }
-
-
+        [HttpGet]
         public async Task<IActionResult> Employees()
         {
             var employees = new List<EmployeeViewModel>();
@@ -82,13 +29,12 @@ namespace InventoryManagementSystem2.Controllers
             try
             {
                 await using var connection = new SqlConnection(connectionString);
-                await connection.OpenAsync();
-
-                using var command = new SqlCommand("ViewEmployees", connection)
+                await using var command = new SqlCommand("GetEmployees", connection)
                 {
                     CommandType = CommandType.StoredProcedure
                 };
 
+                await connection.OpenAsync();
                 using var reader = await command.ExecuteReaderAsync();
                 while (await reader.ReadAsync())
                 {
@@ -97,20 +43,21 @@ namespace InventoryManagementSystem2.Controllers
                         UserId = reader.GetInt32(reader.GetOrdinal("UserID")),
                         FirstName = reader.GetString(reader.GetOrdinal("FirstName")),
                         LastName = reader.GetString(reader.GetOrdinal("LastName")),
-                        Role = reader.GetString(reader.GetOrdinal("Role")),
                         Status = reader.GetBoolean(reader.GetOrdinal("IsActive")) ? "Active" : "Inactive",
+                        Role = reader.GetString(reader.GetOrdinal("Role")),
                         LastLogin = reader.IsDBNull(reader.GetOrdinal("LastLogin"))
-                                    ? DateTime.MinValue
-                                    : reader.GetDateTime(reader.GetOrdinal("LastLogin"))
+                            ? DateTime.MinValue
+                            : reader.GetDateTime(reader.GetOrdinal("LastLogin"))
                     });
                 }
             }
             catch (Exception ex)
             {
-                TempData["ErrorMessage"] = "Error loading employees: " + ex.Message;
+                ViewData["ErrorMessage"] = "Failed to load employees: " + ex.Message;
+                employees = new List<EmployeeViewModel>(); // Fallback to empty list
             }
 
-            return View("~/Views/Home/Employees.cshtml", employees);
+            return View("~/Views/Home/Employees.cshtml");
         }
 
         [HttpPost]
@@ -479,7 +426,6 @@ namespace InventoryManagementSystem2.Controllers
                 return StatusCode(500, "Internal server error: " + ex.Message);
             }
         }
-
 
         private int GetCurrentUserId()
         {

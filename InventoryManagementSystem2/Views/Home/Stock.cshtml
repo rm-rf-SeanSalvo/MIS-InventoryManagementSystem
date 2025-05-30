@@ -1,7 +1,6 @@
 ﻿@using InventoryManagementSystem2.Models
 @using System.Linq
 
-
 @{
     ViewData["Title"] = "Stock";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -36,7 +35,7 @@
 
     <main class="main-content">
         <div class="top-bar">
-            <span class="greeting">Hello, Salvo!</span>
+            <span class="greeting">Hello, @User.Identity?</span>
         </div>
 
         <div class="table-header d-flex justify-content-between align-items-center flex-wrap mb-3">

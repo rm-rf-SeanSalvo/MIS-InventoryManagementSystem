@@ -1,14 +1,4 @@
-﻿
-@model InventoryManagementSystem2.Models.DashboardViewModel;
-
-@if (Model == null)
-{
-    <text>Model is NULL</text>
-}
-else
-{
-    <text>Model is NOT NULL</text>
-}
+﻿@model InventoryManagementSystem2.Models.DashboardViewModel
 
 @{
     ViewData["Title"] = "Admin Dashboard";
@@ -19,87 +9,70 @@ else
     <link rel="stylesheet" href="~/css/admin-dashboard.css" />
 }
 
-@* <div class="dashboard-container">
+<div class="dashboard-container">
     <aside class="sidebar">
         <div class="sidebar-header">Inventory</div>
         <nav class="sidebar-nav">
-            <a href="@Url.Action("Index", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "Index" ? "active" : "")">Dashboard</a>
-            <a href="@Url.Action("Employees", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "Employees" ? "active" : "")">Employees</a>
-            <a href="@Url.Action("Purchase", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "Purchase" ? "active" : "")">Category</a>
-            <a href="@Url.Action("Stock", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "Stock" ? "active" : "")">Stock</a>
-            <a href="@Url.Action("Menu", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "Menu" ? "active" : "")">Menu</a>
-            <a href="@Url.Action("OrderList", "Admin")" class="nav-item @(ViewData["ActivePage"] as string == "OrderList" ? "active" : "")">Order List</a>
+            <a href="@Url.Action("Index", "Admin")" class="nav-item active">Dashboard</a>
+            <a href="@Url.Action("Employees", "Admin")" class="nav-item">Employees</a>
+            <a href="@Url.Action("Purchase", "Admin")" class="nav-item">Category</a>
+            <a href="@Url.Action("Stock", "Admin")" class="nav-item">Stock</a>
+            <a href="@Url.Action("Menu", "Admin")" class="nav-item">Menu</a>
+            <a href="@Url.Action("OrderList", "Admin")" class="nav-item">Order List</a>
         </nav>
-        <a href="/AdminAuth/Logout" class="logout-btn">Log out</a>
+        <a href="/AdminAuth/Logout" class="logout-btn">Log Out</a>
     </aside>
 
     <main class="main-content">
         <div class="top-bar">
-            <span class="greeting">Hello, Salvo!</span>
+            <span class="greeting">Hello, @User.Identity?.Name</span>
         </div>
 
         <div class="card users">
-            <div class="value">@Model.TotalUsers</div>
+            <div class="value">@Model?.TotalUsers</div>
             <div class="label">Users</div>
         </div>
         <div class="card categories">
-            <div class="value">@Model.TotalCategories</div>
+            <div class="value">@Model?.TotalCategories</div>
             <div class="label">Categories</div>
         </div>
         <div class="card products">
-            <div class="value">@Model.TotalProducts</div>
+            <div class="value">@Model?.TotalProducts</div>
             <div class="label">Products</div>
         </div>
 
-
         <div class="tables-row">
             <div class="table-box">
-                <div class="table-header">Recently Added Products</div>
+                <div class="table-header">Recently Modified Ingredients</div>
                 <table>
                     <thead>
                         <tr>
-                            <th>Product Name</th>
+                            <th>Ingredient Name</th>
                             <th>Date</th>
-                            <th>Quantity</th>
+                            <th>Modified By</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr>
-                            <td>Rice</td>
-                            <td>03-28-25</td>
-                            <td>12kg</td>
-                        </tr>
-                        <tr>
-                            <td>Nori Seaweed</td>
-                            <td>03-28-25</td>
-                            <td>Body table</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="table-box">
-                <div class="table-header">Update for stock</div>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Product Name</th>
-                            <th>Stock</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Crab roll</td>
-                            <td><span class="low-stock">LOW</span></td>
-                        </tr>
-                        <tr>
-                            <td>Avocado</td>
-                            <td><span class="low-stock">LOW</span></td>
-                        </tr>
+                        @if (Model?.RecentIngredients != null && Model.RecentIngredients.Any())
+                        {
+                            foreach (var ingredient in Model.RecentIngredients)
+                            {
+                                <tr>
+                                    <td>@ingredient.IngredientName</td>
+                                    <td>@ingredient.ModifiedDate.ToString("yyyy-MM-dd")</td>
+                                    <td>@ingredient.ModifiedByUsername</td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3" style="text-align:center;">No recent ingredient modifications found.</td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
             </div>
         </div>
     </main>
 </div>
- *@
