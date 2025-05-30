@@ -1,4 +1,5 @@
 using InventoryManagementSystem2.DATA;
+using InventoryManagementSystem2.Models;
 using InventoryManagementSystem2.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -49,8 +50,8 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
+
 
 // Enable session
 app.UseSession();

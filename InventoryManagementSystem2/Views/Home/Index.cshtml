@@ -1,4 +1,16 @@
-﻿@{
+﻿
+@model InventoryManagementSystem2.Models.DashboardViewModel;
+
+@if (Model == null)
+{
+    <text>Model is NULL</text>
+}
+else
+{
+    <text>Model is NOT NULL</text>
+}
+
+@{
     ViewData["Title"] = "Admin Dashboard";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -7,7 +19,7 @@
     <link rel="stylesheet" href="~/css/admin-dashboard.css" />
 }
 
-<div class="dashboard-container">
+@* <div class="dashboard-container">
     <aside class="sidebar">
         <div class="sidebar-header">Inventory</div>
         <nav class="sidebar-nav">
@@ -26,20 +38,19 @@
             <span class="greeting">Hello, Salvo!</span>
         </div>
 
-        <div class="stats-cards">
-            <div class="card users">
-                <div class="value">6</div>
-                <div class="label">Users</div>
-            </div>
-            <div class="card categories">
-                <div class="value">10</div>
-                <div class="label">Categories</div>
-            </div>
-            <div class="card products">
-                <div class="value">23</div>
-                <div class="label">Products</div>
-            </div>
+        <div class="card users">
+            <div class="value">@Model.TotalUsers</div>
+            <div class="label">Users</div>
         </div>
+        <div class="card categories">
+            <div class="value">@Model.TotalCategories</div>
+            <div class="label">Categories</div>
+        </div>
+        <div class="card products">
+            <div class="value">@Model.TotalProducts</div>
+            <div class="label">Products</div>
+        </div>
+
 
         <div class="tables-row">
             <div class="table-box">
@@ -91,3 +102,4 @@
         </div>
     </main>
 </div>
+ *@

@@ -18,5 +18,11 @@ namespace InventoryManagementSystem2.Models
 
         [ForeignKey("CategoryID")]
         public Category Category { get; set; }
+
+        public decimal Quantity { get; set; }
+
+        public DateTime DateAdded { get; set; }
+
+        public DateTime? LastReplenished { get; set; }  // Add this
     }
 }

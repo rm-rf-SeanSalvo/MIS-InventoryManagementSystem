@@ -7,13 +7,14 @@ namespace InventoryManagementSystem2.DATA
     {
         public DbSet<Bundle> Bundles { get; set; }
         public DbSet<Customers> Customers { get; set; }
-        public DbSet<Ingredient> Ingredients { get; set; }
+        public DbSet<Ingredient> Ingredient { get; set; }
         public DbSet<OrderList> OrderLists { get; set; }
         public DbSet<Orders> Orders { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<ProductIngredient> ProductIngredients { get; set; }
         public DbSet<Users> Users { get; set; }
         public DbSet<Replenishment> Replenishments { get; set; }
+        public DbSet<Category> Category { get; set; }
 
         // Constructor to accept options
         public InventoryManagementContext(DbContextOptions<InventoryManagementContext> options) : base(options)

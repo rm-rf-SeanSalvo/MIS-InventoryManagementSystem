@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace InventoryManagementSystem2.Models
+﻿namespace InventoryManagementSystem2.Models
 {
     public class StockViewModel
     {
@@ -9,9 +7,13 @@ namespace InventoryManagementSystem2.Models
         public string CategoryName { get; set; }
         public string UnitOfMeasure { get; set; }
         public decimal InStock { get; set; }
-        public DateTime LastReplenished { get; set; }
+        public DateTime? DateAdded { get; set; }
+        public DateTime? LastReplenished { get; set; }
 
-        public Ingredient Ingredient { get; set; }
-        public Category Category { get; set; }
+        // 🛠️ Add this property
+        public string LastUpdatedBy { get; set; }
+
     }
+
+
 }
